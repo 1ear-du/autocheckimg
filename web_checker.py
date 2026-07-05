@@ -320,15 +320,10 @@ def check():
                     "message": f"图片尺寸为 {w}\u00d7{h}，符合\u300c{target_name}\u300f要求 ({target_w}\u00d7{target_h})"}
         resized = img.resize((target_w, target_h), Image.LANCZOS)
         buf = io.BytesIO()
-        fmt = "PNG"
-        if "." in file.filename:
-            e = file.filename.rsplit(".", 1)[-1].upper()
-            if e in ("JPG", "JPEG"): fmt = "JPEG"
-            elif e in ("PNG", "WEBP", "GIF"): fmt = e
-        resized.save(buf, format=fmt)
+        resized.save(buf, format="JPEG", quality=85)
         buf.seek(0)
         b64 = base64.b64encode(buf.getvalue()).decode()
-        ext = fmt.lower()
+        ext = "jpg"
         name = f"{os.path.splitext(file.filename)[0]}_{target_name}_{target_w}x{target_h}.{ext}"
         return {"status": "resized",
                 "message": f"原始尺寸: {w}\u00d7{h} \u2192 {target_w}\u00d7{target_h}",
