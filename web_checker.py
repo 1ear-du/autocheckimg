@@ -261,29 +261,19 @@ async function submitImage() {
     loading.style.display = 'none';
 
     if (data.status === 'correct') {
-      showModal('\u2705', '\u5c3a\u5bf8\u6b63\u786e', data.message, '', [
-        { label: '\u786e\u5b9a', primary: true }
-      ]);
+      alert('✅ 尺寸正确\n' + data.message);
     } else if (data.status === 'resized') {
       downloadData = { url: data.download_url, name: data.filename };
-      showModal('\u270f\ufe0f', '\u5c3a\u5bf8\u5df2\u8c03\u6574',
-        '\u662f\u5426\u4e0b\u8f7d\u4fee\u6539\u540e\u56fe\u50cf\uff1f',
-        data.message,
-        [
-          { label: '\u5426', primary: false, action: function() { downloadData = null; } },
-          { label: '\u662f', primary: true, action: function() { triggerDownload(downloadData.url, downloadData.name); downloadData = null; } }
-        ]
-      );
+      if (confirm('✏️ 已将图片调整为 ' + data.new_size + '\n是否下载修改后的图像？')) {
+        triggerDownload(downloadData.url, downloadData.name);
+      }
+      downloadData = null;
     } else {
-      showModal('\u274c', '\u5904\u7406\u5931\u8d25', data.message, '', [
-        { label: '\u786e\u5b9a', primary: true }
-      ]);
+      alert('❌ 处理失败\n' + data.message);
     }
   } catch (e) {
     loading.style.display = 'none';
-    showModal('\u274c', '\u7f51\u7edc\u9519\u8bef', '\u8bf7\u6c42\u5931\u8d25\uff0c\u8bf7\u68c0\u67e5\u670d\u52a1\u5668\u662f\u5426\u8fd0\u884c', e.message, [
-      { label: '\u786e\u5b9a', primary: true }
-    ]);
+    alert('❌ 网络错误\n' + e.message + '\n请确认服务器已启动');
   }
 
   btn.disabled = false;
