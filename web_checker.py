@@ -41,7 +41,7 @@ h1{font-size:28px;font-weight:700;margin-bottom:8px}
 .btn{display:inline-block;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:background .15s}
 .btn:hover{background:#0060c8}
 .btn:disabled{background:#c7c7cc;cursor:not-allowed}
-.file-input{position:absolute;width:0.1px;height:0.1px;opacity:0.01;z-index:-1}
+.file-input{display:none}
 .info-row{display:flex;justify-content:space-between;font-size:13px;color:#6e6e73;margin:8px 0}
 .info-row span:last-child{font-weight:600;color:#1d1d1f}
 #loading{display:none;text-align:center;margin-top:16px}
@@ -83,7 +83,7 @@ h1{font-size:22px}
 <div class="instruction-btn" data-value="2" onclick="selectInstruction(this)"><div class="name">8号门</div><div class="size">1032 × 1720</div></div>
 <div class="instruction-btn" data-value="3" onclick="selectInstruction(this)"><div class="name">广告机</div><div class="size">2160 × 3840</div></div>
 </div>
-<label for="fileInput" class="upload-zone" id="dropZone">
+<div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
 <div id="uploadPrompt"><p style="font-size:32px;margin-bottom:8px">📤</p><p>点击或拖拽图片到此处</p><p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p><span class="paste-hint">👆 点击选择 / ⌘V 粘贴</span></div>
 <div id="previewArea" style="display:none">
 <img id="previewImg" alt="预览">
@@ -93,7 +93,7 @@ h1{font-size:22px}
 <button class="delete-btn" onclick="clearImage()">✕ 删除</button>
 </div>
 </div>
-</label>
+</div>
 <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFile(this)">
 <button class="btn" id="submitBtn" disabled onclick="submitImage()">开始审核</button>
 <div id="loading"><p>⏳ 处理中...</p></div>
@@ -226,11 +226,7 @@ function loadFile(f) {
   r.readAsDataURL(f);
 }
 
-// iOS Safari touch support - 确保点击上传区域能打开文件选择器
-document.getElementById('dropZone').addEventListener('touchstart', function(e) {
-  // 不阻止默认行为，让 label 正常触发文件输入
-  // 这只确保 iOS 上 touch 事件能正确传递
-});
+
 
 function updateSubmit() {
   document.getElementById('submitBtn').disabled = !(selectedInstruction && currentFile);
