@@ -41,7 +41,7 @@ h1{font-size:28px;font-weight:700;margin-bottom:8px}
 .btn{display:inline-block;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:background .15s}
 .btn:hover{background:#0060c8}
 .btn:disabled{background:#c7c7cc;cursor:not-allowed}
-.file-input{display:none}
+.file-input{position:absolute;width:0.1px;height:0.1px;opacity:0.01;z-index:-1}
 .info-row{display:flex;justify-content:space-between;font-size:13px;color:#6e6e73;margin:8px 0}
 .info-row span:last-child{font-weight:600;color:#1d1d1f}
 #loading{display:none;text-align:center;margin-top:16px}
@@ -226,6 +226,12 @@ function loadFile(f) {
   r.readAsDataURL(f);
 }
 
+// iOS Safari touch support - 确保点击上传区域能打开文件选择器
+document.getElementById('dropZone').addEventListener('touchstart', function(e) {
+  // 不阻止默认行为，让 label 正常触发文件输入
+  // 这只确保 iOS 上 touch 事件能正确传递
+});
+
 function updateSubmit() {
   document.getElementById('submitBtn').disabled = !(selectedInstruction && currentFile);
 }
@@ -255,25 +261,40 @@ async function submitImage() {
   fd.append('image', currentFile);
   fd.append('instruction', selectedInstruction);
 
+  // Abort after 60 seconds (Render冷启动可能需要30s)
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+
   try {
-    const resp = await fetch('/check', { method: 'POST', body: fd });
+    const resp = await fetch('/check', { method: 'POST', body: fd, signal: controller.signal });
+    clearTimeout(timeout);
     const data = await resp.json();
     loading.style.display = 'none';
 
     if (data.status === 'correct') {
-      alert('✅ 尺寸正确\n' + data.message);
+      alert('✅ 尺寸正确
+' + data.message);
     } else if (data.status === 'resized') {
-      downloadData = { url: data.download_url, name: data.filename };
-      if (confirm('✏️ 已将图片调整为 ' + data.new_size + '\n是否下载修改后的图像？')) {
-        triggerDownload(downloadData.url, downloadData.name);
+      const url = data.download_url;
+      const name = data.filename;
+      if (confirm('✏️ 已将图片调整为 ' + data.new_size + '
+是否下载修改后的图像？')) {
+        triggerDownload(url, name);
       }
-      downloadData = null;
     } else {
-      alert('❌ 处理失败\n' + data.message);
+      alert('❌ 处理失败
+' + data.message);
     }
   } catch (e) {
+    clearTimeout(timeout);
     loading.style.display = 'none';
-    alert('❌ 网络错误\n' + e.message + '\n请确认服务器已启动');
+    if (e.name === 'AbortError') {
+      alert('⏳ 请求超时
+服务器可能正在唤醒，请稍候再试');
+    } else {
+      alert('❌ 网络错误
+' + e.message);
+    }
   }
 
   btn.disabled = false;
