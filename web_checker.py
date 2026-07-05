@@ -209,20 +209,24 @@ document.addEventListener('paste', function(e) {
 
 function loadFile(f) {
   currentFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  updateSubmit();
   const r = new FileReader();
   r.onload = function(e) {
+    document.getElementById('uploadPrompt').style.display = 'none';
+    document.getElementById('previewArea').style.display = 'block';
+    document.getElementById('previewImg').src = e.target.result;
+    document.getElementById('dropZone').classList.add('has-image');
     const img = new Image();
     img.onload = function() {
-      document.getElementById('uploadPrompt').style.display = 'none';
-      document.getElementById('previewArea').style.display = 'block';
-      document.getElementById('previewImg').src = e.target.result;
-      document.getElementById('fileName').textContent = f.name;
       document.getElementById('fileDims').textContent = img.width + ' \u00d7 ' + img.height;
-      document.getElementById('dropZone').classList.add('has-image');
-      updateSubmit();
+    };
+    img.onerror = function() {
+      document.getElementById('fileDims').textContent = '(无法识别尺寸)';
     };
     img.src = e.target.result;
   };
+  r.onerror = function() {};
   r.readAsDataURL(f);
 }
 
