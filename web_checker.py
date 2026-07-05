@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""
-图片自动审核工具 - Web 版本 (弹窗交互)
-"""
+"""图片自动审核工具 - 简洁版"""
 import os, io, base64
-from flask import Flask, request, render_template_string
+from flask import Flask, render_template_string, request
 from PIL import Image
 
 app = Flask(__name__)
@@ -13,308 +11,181 @@ HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>www.autocheckimg.dyy.com - 图片自动审核</title>
+<title>图片自动审核</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f7;color:#1d1d1f;min-height:100vh;display:flex;flex-direction:column;align-items:center}
-.container{max-width:720px;width:100%;padding:40px 24px}
-h1{font-size:28px;font-weight:700;margin-bottom:8px}
-.subtitle{color:#6e6e73;font-size:14px;margin-bottom:32px}
-.card{background:#fff;border-radius:12px;padding:28px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.instruction-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.instruction-btn{border:2px solid #e8e8ed;border-radius:10px;padding:12px 8px;background:#fff;cursor:pointer;text-align:center;transition:all .15s;font-size:13px;-webkit-user-select:none;user-select:none}
-.instruction-btn:hover{border-color:#0071e3}
-.instruction-btn.active{border-color:#0071e3;background:#e8f0fe;font-weight:600}
-.instruction-btn .name{font-size:15px;font-weight:600}
-.instruction-btn .size{color:#6e6e73;font-size:12px;margin-top:2px}
-.upload-zone{border:2px dashed #c7c7cc;border-radius:10px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:4px}
-.upload-zone:hover,.upload-zone.dragover{border-color:#0071e3;background:#e8f0fe}
-.upload-zone.has-image{border-style:solid;border-color:#34c759;padding:16px}
-.upload-zone img{max-width:100%;max-height:260px;border-radius:6px;display:block;margin:0 auto}
-.upload-zone p{color:#6e6e73;font-size:14px;margin-top:8px}
-.paste-hint{display:inline-block;background:#f0f0f5;color:#6e6e73;font-size:11px;padding:2px 8px;border-radius:4px;margin-top:6px}
-.preview-actions{display:flex;gap:8px;margin-top:12px;justify-content:center}
-.delete-btn{background:#fff;border:1px solid #e8e8ed;border-radius:8px;padding:8px 24px;font-size:13px;font-weight:600;cursor:pointer;color:#ff3b30;transition:all .15s}
-.delete-btn:hover{background:#ff3b30;color:#fff;border-color:#ff3b30}
-.paste-btn{background:#fff;border:1px solid #e8e8ed;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;color:#1d1d1f;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
-.paste-btn:hover{border-color:#0071e3;color:#0071e3}
-.btn{display:inline-block;background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:background .15s}
-.btn:hover{background:#0060c8}
-.btn:disabled{background:#c7c7cc;cursor:not-allowed}
-.file-input{display:none}
-.info-row{display:flex;justify-content:space-between;font-size:13px;color:#6e6e73;margin:8px 0}
-.info-row span:last-child{font-weight:600;color:#1d1d1f}
-#loading{display:none;text-align:center;margin-top:16px}
-#loading p{color:#6e6e73}
-#modalOverlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
-#modalBox{background:#fff;border-radius:14px;padding:32px 28px 24px;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.15);animation:fadeIn .2s ease}
-#modalIcon{font-size:48px;margin-bottom:12px}
-#modalTitle{font-size:20px;font-weight:700;margin-bottom:8px}
-#modalMsg{font-size:14px;color:#6e6e73;margin-bottom:8px;line-height:1.5}
-#modalDetail{font-size:13px;color:#999;margin-bottom:20px;line-height:1.4}
-#modalButtons{display:flex;gap:10px;justify-content:center}
-@keyframes fadeIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
-@media(max-width:600px){
-.container{padding:24px 16px}
-h1{font-size:22px}
-.card{padding:20px 16px}
-.instruction-grid{grid-template-columns:repeat(3,1fr);gap:6px}
-.instruction-btn{padding:10px 4px;font-size:12px}
-.instruction-btn .name{font-size:13px}
-.instruction-btn .size{font-size:11px}
-.upload-zone{padding:24px 16px}
-.upload-zone img{max-height:180px}
-.btn{padding:14px 24px;font-size:16px}
-#modalBox{margin:0 16px;padding:24px 20px}
-#modalBox #modalTitle{font-size:18px}
-#modalButtons button{padding:12px 24px;font-size:16px;flex:1}
-.info-row{font-size:12px}
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f5f5f7;color:#1d1d1f;padding:24px;display:flex;flex-direction:column;align-items:center}
+.box{max-width:640px;width:100%}
+h1{font-size:26px;margin-bottom:6px}
+.sub{color:#6e6e73;font-size:14px;margin-bottom:28px}
+.card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px}
+.label{font-size:13px;font-weight:600;color:#6e6e73;margin-bottom:10px}
+.btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.opt{border:2px solid #e8e8ed;border-radius:10px;padding:12px;text-align:center;cursor:pointer;font-size:13px;background:#fff;-webkit-user-select:none}
+.opt:hover{border-color:#0071e3}
+.opt.on{border-color:#0071e3;background:#e8f0fe;font-weight:600}
+.opt .nm{font-size:15px;font-weight:600;margin-bottom:2px}
+.opt .sz{color:#6e6e73;font-size:12px}
+.upzone{border:2px dashed #c7c7cc;border-radius:10px;padding:40px;text-align:center;cursor:pointer;margin-bottom:16px;transition:.15s}
+.upzone:hover{border-color:#0071e3;background:#e8f0fe}
+.upzone.hasimg{border-style:solid;border-color:#34c759;padding:16px}
+.upzone img{max-width:100%;max-height:260px;border-radius:6px;display:block;margin:0 auto}
+.preview{display:none}
+.inf{font-size:13px;color:#6e6e73;margin-top:8px}
+.inf span{font-weight:600;color:#1d1d1f}
+.fa{display:flex;gap:8px;margin-top:10px;justify-content:center}
+.del{cursor:pointer;border:1px solid #e8e8ed;border-radius:8px;padding:8px 24px;font-size:13px;font-weight:600;color:#ff3b30;background:#fff}
+.del:hover{background:#ff3b30;color:#fff;border-color:#ff3b30}
+.btn{background:#0071e3;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
+.btn:disabled{background:#c7c7cc;cursor:default}
+#load{display:none;text-align:center;margin-top:16px;color:#6e6e73}
+@media(max-width:600px){.box{padding:0}.card{padding:20px 16px}.opt{padding:10px}.upzone{padding:24px 16px}}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>📷 <span style="color:#0071e3">autocheckimg.dyy.com</span></h1>
-<p class="subtitle">上传图片 → 选择指令 → 自动检查或调整尺寸</p>
+<div class="box">
+<h1>图片自动审核</h1>
+<p class="sub">上传图片 → 选择指令 → 自动检查或调整尺寸</p>
+
 <div class="card">
-<p style="font-size:13px;color:#6e6e73;margin-bottom:10px;font-weight:600">选择指令</p>
-<div class="instruction-grid">
-<div class="instruction-btn" data-value="1"><div class="name">2号门</div><div class="size">1440 × 1080</div></div>
-<div class="instruction-btn" data-value="2"><div class="name">8号门</div><div class="size">1032 × 1720</div></div>
-<div class="instruction-btn" data-value="3"><div class="name">广告机</div><div class="size">2160 × 3840</div></div>
+<div class="label">选择指令</div>
+<div class="btns" id="btnGroup">
+<div class="opt" data-v="1"><div class="nm">2号门</div><div class="sz">1440 × 1080</div></div>
+<div class="opt" data-v="2"><div class="nm">8号门</div><div class="sz">1032 × 1720</div></div>
+<div class="opt" data-v="3"><div class="nm">广告机</div><div class="sz">2160 × 3840</div></div>
 </div>
-<div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-<div id="uploadPrompt"><p style="font-size:32px;margin-bottom:8px">📤</p><p>点击或拖拽图片到此处</p><p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p><span class="paste-hint">👆 点击选择 / ⌘V 粘贴</span></div>
-<div id="previewArea" style="display:none">
-<img id="previewImg" alt="预览">
-<div class="info-row"><span>文件名</span><span id="fileName">-</span></div>
-<div class="info-row"><span>图片尺寸</span><span id="fileDims">-</span></div>
-<div class="preview-actions">
-<button class="delete-btn" onclick="clearImage()">✕ 删除</button>
+
+<div class="upzone" id="zone">
+<div id="prompt">
+<div style="font-size:32px;margin-bottom:8px">&#x1f4e4;</div>
+<p>点击选择图片</p>
+<p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p>
 </div>
-</div>
-</div>
-<input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFile(this)">
-<button class="btn" id="submitBtn" disabled onclick="submitImage()">开始审核</button>
-<div id="loading"><p>⏳ 处理中...</p></div>
+<div class="preview" id="prev">
+<img id="prevImg" alt="">
+<div class="inf">文件名: <span id="fname">-</span></div>
+<div class="inf">尺寸: <span id="fdims">-</span></div>
+<div class="fa"><button class="del" id="delBtn">&#x2715; 删除</button></div>
 </div>
 </div>
 
-<div id="modalOverlay" onclick="closeModal(event)">
-<div id="modalBox" onclick="event.stopPropagation()">
-<div id="modalIcon"></div>
-<div id="modalTitle"></div>
-<div id="modalMsg"></div>
-<div id="modalDetail"></div>
-<div id="modalButtons"></div>
+<input type="file" id="fileIn" accept="image/*" style="display:none">
+<button class="btn" id="subBtn" disabled>开始审核</button>
+<div id="load">处理中...</div>
 </div>
 </div>
 
 <script>
-let selectedInstruction = null;
-let currentFile = null;
-let downloadData = null;
+var curFile = null;
+var curInst = null;
 
-function selectInstruction(el) {
-  document.querySelectorAll('.instruction-btn').forEach(function(i) { i.classList.remove('active'); });
-  el.classList.add('active');
-  selectedInstruction = el.dataset.value;
-  updateSubmit();
-}
-
-function showModal(icon, title, msg, detail, buttons) {
-  document.getElementById('modalIcon').textContent = icon;
-  document.getElementById('modalTitle').textContent = title;
-  document.getElementById('modalMsg').textContent = msg;
-  document.getElementById('modalDetail').textContent = detail || '';
-  const c = document.getElementById('modalButtons');
-  c.innerHTML = '';
-  buttons.forEach(b => {
-    const btn = document.createElement('button');
-    btn.textContent = b.label;
-    Object.assign(btn.style, {
-      padding: '10px 28px', borderRadius: '8px', border: 'none',
-      fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-      background: b.primary ? '#0071e3' : '#e8e8ed',
-      color: b.primary ? '#fff' : '#1d1d1f'
-    });
-    btn.onclick = function() {
-      document.getElementById('modalOverlay').style.display = 'none';
-      if (b.action) b.action();
-    };
-    c.appendChild(btn);
-  });
-  document.getElementById('modalOverlay').style.display = 'flex';
-}
-
-function closeModal(e) {
-  if (e && e.target !== e.currentTarget) return;
-  document.getElementById('modalOverlay').style.display = 'none';
-}
-
-function triggerDownload(url, filename) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-function handleFile(i) {
-  const f = i.files[0];
-  if (!f) return;
-  loadFile(f);
-}
-
-document.getElementById('dropZone').addEventListener('dragover', function(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.add('dragover');
-});
-document.getElementById('dropZone').addEventListener('dragleave', function(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.remove('dragover');
-});
-document.getElementById('dropZone').addEventListener('drop', function(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.remove('dragover');
-  const f = e.dataTransfer.files[0];
-  if (!f || !f.type.startsWith('image/')) return;
-  document.getElementById('fileInput').files = e.dataTransfer.files;
-  loadFile(e.dataTransfer.files[0]);
+// 指令按钮
+document.getElementById('btnGroup').addEventListener('click', function(e) {
+  var btn = e.target.closest('.opt');
+  if (!btn) return;
+  document.querySelectorAll('.opt').forEach(function(el) { el.classList.remove('on'); });
+  btn.classList.add('on');
+  curInst = btn.getAttribute('data-v');
+  updateBtn();
 });
 
-
-// ===== 指令按钮点击事件 =====
-document.querySelectorAll('.instruction-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    selectInstruction(this);
-  });
+// 上传区域点击
+document.getElementById('zone').addEventListener('click', function() {
+  document.getElementById('fileIn').click();
 });
 
-// ===== 粘贴上传图片 =====
-document.addEventListener('paste', function(e) {
-  if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
-  const items = e.clipboardData && e.clipboardData.items;
-  if (!items) return;
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].type.startsWith('image/')) {
-      const file = items[i].getAsFile();
-      if (file) {
-        // Clipboard files don't have a meaningful name
-        const renamed = new File([file], 'pasted_image.png', { type: file.type });
-        document.getElementById('fileInput').files = (function() {
-          const dt = new DataTransfer();
-          dt.items.add(renamed);
-          return dt.files;
-        })();
-        loadFile(renamed);
-      }
-      break;
-    }
-  }
-});
-
-function loadFile(f) {
-  currentFile = f;
-  document.getElementById('fileName').textContent = f.name;
-  updateSubmit();
-  const r = new FileReader();
-  r.onload = function(e) {
-    document.getElementById('uploadPrompt').style.display = 'none';
-    document.getElementById('previewArea').style.display = 'block';
-    document.getElementById('previewImg').src = e.target.result;
-    document.getElementById('dropZone').classList.add('has-image');
-    const img = new Image();
+// 文件选择
+document.getElementById('fileIn').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  curFile = file;
+  updateBtn();
+  // 预览
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
     img.onload = function() {
-      document.getElementById('fileDims').textContent = img.width + ' \u00d7 ' + img.height;
+      document.getElementById('prompt').style.display = 'none';
+      document.getElementById('prev').style.display = 'block';
+      document.getElementById('prevImg').src = ev.target.result;
+      document.getElementById('fname').textContent = file.name;
+      document.getElementById('fdims').textContent = img.width + ' x ' + img.height;
+      document.getElementById('zone').classList.add('hasimg');
     };
-    img.onerror = function() {
-      document.getElementById('fileDims').textContent = '(无法识别尺寸)';
-    };
-    img.src = e.target.result;
+    img.src = ev.target.result;
   };
-  r.onerror = function() {};
-  r.readAsDataURL(f);
+  reader.readAsDataURL(file);
+});
+
+// 删除按钮
+document.getElementById('delBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  clearAll();
+});
+
+function clearAll() {
+  curFile = null;
+  curInst = null;
+  document.querySelectorAll('.opt').forEach(function(el) { el.classList.remove('on'); });
+  document.getElementById('fileIn').value = '';
+  document.getElementById('prompt').style.display = 'block';
+  document.getElementById('prev').style.display = 'none';
+  document.getElementById('zone').classList.remove('hasimg');
+  updateBtn();
 }
 
-
-
-function updateSubmit() {
-  document.getElementById('submitBtn').disabled = !(selectedInstruction && currentFile);
+function updateBtn() {
+  document.getElementById('subBtn').disabled = !(curInst && curFile);
 }
 
-function clearImage() {
-  currentFile = null;
-  selectedInstruction = null;
-  document.querySelectorAll('.instruction-btn').forEach(i => i.classList.remove('active'));
-  document.getElementById('fileInput').value = '';
-  document.getElementById('uploadPrompt').style.display = 'block';
-  document.getElementById('previewArea').style.display = 'none';
-  document.getElementById('previewImg').src = '';
-  document.getElementById('fileName').textContent = '-';
-  document.getElementById('fileDims').textContent = '-';
-  document.getElementById('dropZone').classList.remove('has-image');
-  updateSubmit();
-}
-
-async function submitImage() {
-  if (!selectedInstruction || !currentFile) return;
-  const btn = document.getElementById('submitBtn');
-  const loading = document.getElementById('loading');
+// 提交
+document.getElementById('subBtn').addEventListener('click', function() {
+  if (!curInst || !curFile) return;
+  var btn = this;
+  var load = document.getElementById('load');
   btn.disabled = true;
-  loading.style.display = 'block';
+  load.style.display = 'block';
 
-  const fd = new FormData();
-  fd.append('image', currentFile);
-  fd.append('instruction', selectedInstruction);
+  var fd = new FormData();
+  fd.append('image', curFile);
+  fd.append('instruction', curInst);
 
-  // Abort after 60 seconds (Render冷启动可能需要30s)
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
-
-  try {
-    const resp = await fetch('/check', { method: 'POST', body: fd, signal: controller.signal });
-    clearTimeout(timeout);
-    const data = await resp.json();
-    loading.style.display = 'none';
-
-    if (data.status === 'correct') {
-      alert('✅ 尺寸正确
-' + data.message);
-    } else if (data.status === 'resized') {
-      const url = data.download_url;
-      const name = data.filename;
-      if (confirm('✏️ 已将图片调整为 ' + data.new_size + '
-是否下载修改后的图像？')) {
-        triggerDownload(url, name);
+  fetch('/check', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      load.style.display = 'none';
+      if (data.status === 'correct') {
+        alert('\u2705 \u5c3a\u5bf8\u6b63\u786e\n' + data.message);
+      } else if (data.status === 'resized') {
+        if (confirm('\u270f\ufe0f \u5df2\u5c06\u56fe\u7247\u8c03\u6574\u4e3a ' + data.new_size + '\n\u662f\u5426\u4e0b\u8f7d\u4fee\u6539\u540e\u7684\u56fe\u50cf\uff1f')) {
+          var a = document.createElement('a');
+          a.href = data.download_url;
+          a.download = data.filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      } else {
+        alert('\u274c \u5904\u7406\u5931\u8d25\n' + data.message);
       }
-    } else {
-      alert('❌ 处理失败
-' + data.message);
-    }
-  } catch (e) {
-    clearTimeout(timeout);
-    loading.style.display = 'none';
-    if (e.name === 'AbortError') {
-      alert('⏳ 请求超时
-服务器可能正在唤醒，请稍候再试');
-    } else {
-      alert('❌ 网络错误
-' + e.message);
-    }
-  }
+      btn.disabled = false;
+    })
+    .catch(function(err) {
+      load.style.display = 'none';
+      alert('\u274c \u7f51\u7edc\u9519\u8bef\n' + err.message);
+      btn.disabled = false;
+    });
+});
 
-  btn.disabled = false;
-}
+// 删除按钮阻止冒泡已处理
 </script>
 </body>
 </html>
 """
 
-INSTRUCTIONS = {"1": {"name": "2号门", "width": 1440, "height": 1080},
-                "2": {"name": "8号门", "width": 1032, "height": 1720},
-                "3": {"name": "广告机", "width": 2160, "height": 3840}}
+INSTRUCTIONS = {"1": {"name": "2号门", "w": 1440, "h": 1080},
+                "2": {"name": "8号门", "w": 1032, "h": 1720},
+                "3": {"name": "广告机", "w": 2160, "h": 3840}}
 
 @app.route("/")
 def index():
@@ -322,46 +193,38 @@ def index():
 
 @app.route("/check", methods=["POST"])
 def check():
-    if "image" not in request.files:
+    f = request.files.get("image")
+    if not f:
         return {"status": "error", "message": "未上传图片"}, 400
-    file = request.files["image"]
-    instruction = request.form.get("instruction", "").strip()
-    if instruction not in INSTRUCTIONS:
-        return {"status": "error", "message": f"无效指令: {instruction}"}, 400
-    target = INSTRUCTIONS[instruction]
-    target_w, target_h = target["width"], target["height"]
-    target_name = target["name"]
+    inst = request.form.get("instruction", "").strip()
+    if inst not in INSTRUCTIONS:
+        return {"status": "error", "message": "无效指令"}, 400
+    t = INSTRUCTIONS[inst]
     try:
-        img = Image.open(file.stream)
+        img = Image.open(f.stream)
         w, h = img.size
-        if w == target_w and h == target_h:
+        if w == t["w"] and h == t["h"]:
             return {"status": "correct",
-                    "message": f"图片尺寸为 {w}\u00d7{h}，符合\u300c{target_name}\u300f要求 ({target_w}\u00d7{target_h})"}
-        resized = img.resize((target_w, target_h), Image.LANCZOS)
+                    "message": "图片尺寸为 %d\u00d7%d，符合「%s」要求 (%d\u00d7%d)" % (w, h, t["name"], t["w"], t["h"])}
+        resized = img.resize((t["w"], t["h"]), Image.LANCZOS)
         buf = io.BytesIO()
-        fmt = "PNG"
-        if "." in file.filename:
-            e = file.filename.rsplit(".", 1)[-1].upper()
-            if e in ("JPG", "JPEG"): fmt = "JPEG"
-            elif e in ("PNG", "WEBP", "GIF"): fmt = e
-        resized.save(buf, format=fmt)
-        buf.seek(0)
+        ext = "PNG"
+        if "." in f.filename:
+            e = f.filename.rsplit(".", 1)[-1].upper()
+            if e in ("JPG", "JPEG"): ext = "JPEG"
+            elif e in ("PNG", "WEBP", "GIF"): ext = e
+        resized.save(buf, format=ext)
         b64 = base64.b64encode(buf.getvalue()).decode()
-        ext = fmt.lower()
-        name = f"{os.path.splitext(file.filename)[0]}_{target_name}_{target_w}x{target_h}.{ext}"
+        fn = "%s_%s_%dx%d.%s" % (os.path.splitext(f.filename)[0], t["name"], t["w"], t["h"], ext.lower())
         return {"status": "resized",
-                "message": f"原始尺寸: {w}\u00d7{h} \u2192 {target_w}\u00d7{target_h}",
-                "new_size": f"{target_w}\u00d7{target_h}",
-                "download_url": f"data:image/{ext};base64,{b64}",
-                "filename": name}
+                "message": "原始: %d\u00d7%d \u2192 %d\u00d7%d" % (w, h, t["w"], t["h"]),
+                "new_size": "%d\u00d7%d" % (t["w"], t["h"]),
+                "download_url": "data:image/%s;base64,%s" % (ext.lower(), b64),
+                "filename": fn}
     except Exception as e:
-        return {"status": "error", "message": f"处理图片时出错: {str(e)}"}, 500
+        return {"status": "error", "message": str(e)}, 500
 
 if __name__ == "__main__":
-    print("=" * 50)
-    print("  autocheckimg.dyy.com - 图片自动审核工具")
     port = int(os.environ.get("PORT", 5001))
-    host = os.environ.get("HOST", "0.0.0.0")
-    print(f"  启动地址: http://{host}:{port}")
-    print("=" * 50)
-    app.run(debug=False, host=host, port=port)
+    print("http://0.0.0.0:%d" % port)
+    app.run(debug=False, host="0.0.0.0", port=port)
