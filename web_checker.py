@@ -79,9 +79,9 @@ h1{font-size:22px}
 <div class="card">
 <p style="font-size:13px;color:#6e6e73;margin-bottom:10px;font-weight:600">选择指令</p>
 <div class="instruction-grid">
-<div class="instruction-btn" data-value="1" onclick="selectInstruction(this)"><div class="name">2号门</div><div class="size">1440 × 1080</div></div>
-<div class="instruction-btn" data-value="2" onclick="selectInstruction(this)"><div class="name">8号门</div><div class="size">1032 × 1720</div></div>
-<div class="instruction-btn" data-value="3" onclick="selectInstruction(this)"><div class="name">广告机</div><div class="size">2160 × 3840</div></div>
+<div class="instruction-btn" data-value="1"><div class="name">2号门</div><div class="size">1440 × 1080</div></div>
+<div class="instruction-btn" data-value="2"><div class="name">8号门</div><div class="size">1032 × 1720</div></div>
+<div class="instruction-btn" data-value="3"><div class="name">广告机</div><div class="size">2160 × 3840</div></div>
 </div>
 <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
 <div id="uploadPrompt"><p style="font-size:32px;margin-bottom:8px">📤</p><p>点击或拖拽图片到此处</p><p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p><span class="paste-hint">👆 点击选择 / ⌘V 粘贴</span></div>
@@ -116,7 +116,7 @@ let currentFile = null;
 let downloadData = null;
 
 function selectInstruction(el) {
-  document.querySelectorAll('.instruction-btn').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.instruction-btn').forEach(function(i) { i.classList.remove('active'); });
   el.classList.add('active');
   selectedInstruction = el.dataset.value;
   updateSubmit();
@@ -182,6 +182,14 @@ document.getElementById('dropZone').addEventListener('drop', function(e) {
   if (!f || !f.type.startsWith('image/')) return;
   document.getElementById('fileInput').files = e.dataTransfer.files;
   loadFile(e.dataTransfer.files[0]);
+});
+
+
+// ===== 指令按钮点击事件 =====
+document.querySelectorAll('.instruction-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    selectInstruction(this);
+  });
 });
 
 // ===== 粘贴上传图片 =====
