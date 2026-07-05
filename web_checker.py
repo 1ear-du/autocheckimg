@@ -83,8 +83,8 @@ h1{font-size:22px}
 <div class="instruction-btn" data-value="2" onclick="selectInstruction(this)"><div class="name">8号门</div><div class="size">1032 × 1720</div></div>
 <div class="instruction-btn" data-value="3" onclick="selectInstruction(this)"><div class="name">广告机</div><div class="size">2160 × 3840</div></div>
 </div>
-<div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-<div id="uploadPrompt"><p style="font-size:32px;margin-bottom:8px">📤</p><p>点击或拖拽图片到此处</p><p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p><span class="paste-hint">⌘V 粘贴图片</span></div>
+<label for="fileInput" class="upload-zone" id="dropZone">
+<div id="uploadPrompt"><p style="font-size:32px;margin-bottom:8px">📤</p><p>点击或拖拽图片到此处</p><p style="font-size:12px;color:#999;margin-top:4px">支持 JPG / PNG / WebP</p><span class="paste-hint">👆 点击选择 / ⌘V 粘贴</span></div>
 <div id="previewArea" style="display:none">
 <img id="previewImg" alt="预览">
 <div class="info-row"><span>文件名</span><span id="fileName">-</span></div>
@@ -92,7 +92,7 @@ h1{font-size:22px}
 <div class="preview-actions">
 <button class="delete-btn" onclick="clearImage()">✕ 删除</button>
 </div>
-</div>
+</label>
 </div>
 <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFile(this)">
 <button class="btn" id="submitBtn" disabled onclick="submitImage()">开始审核</button>
