@@ -92,8 +92,8 @@ h1{font-size:22px}
 <div class="preview-actions">
 <button class="delete-btn" onclick="clearImage()">✕ 删除</button>
 </div>
-</label>
 </div>
+</label>
 <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFile(this)">
 <button class="btn" id="submitBtn" disabled onclick="submitImage()">开始审核</button>
 <div id="loading"><p>⏳ 处理中...</p></div>
